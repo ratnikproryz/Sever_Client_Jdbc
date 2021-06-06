@@ -15,6 +15,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import Controller.DAO;
+import Controller.SearchKH;
+import Controller.SelectKH;
+import Controller.UpdateKH;
+import Controller.insertKH;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -24,10 +28,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.util.Enumeration;
 import java.util.Vector;
 import java.awt.event.ActionEvent;
 
@@ -43,13 +50,14 @@ public class KhachHangView extends JFrame {
 	private JComboBox cbMDSD;
 	private JLabel SDT;
 	private JTextField tfSDT;
-	private JButton btInsert, btDelete, btSearch, btUpdate, btGetInfor;
+	private JButton btInsert, btDelete, btSearch, btUpdate;
 	private JScrollPane scrTable;
 	private JTable table;
 	private DefaultTableModel tableModel;
 	private Vector vData= new Vector();
 	private Vector vTitle= new Vector();
 	private JButton btDK, btHD;
+	private JTextField tfSearch;
 
 	/**
 	 * Launch the application.
@@ -146,23 +154,35 @@ public class KhachHangView extends JFrame {
 		btInsert = new JButton("Insert");
 		btInsert.setBounds(15, 317, 100, 29);
 		leftJPanel.add(btInsert);
+		btInsert.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				insert();
+			}
+		});
+		
 		
 		btUpdate = new JButton("Update");
 		btUpdate.setBounds(134, 317, 100, 29);
 		leftJPanel.add(btUpdate);
+		btUpdate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				update();
+				reload();
+				Enumeration enumeration = vData.elements();
+				while (enumeration.hasMoreElements()) {
+					String string =enumeration.nextElement().toString();
+					System.out.println(string);
+				}
+//				tableModel= new DefaultTableModel(vData, vTitle);
+//				table.setModel(tableModel);
+			}
+		});
 		
 		btDelete = new JButton("Delete");
 		btDelete.setBounds(253, 317, 100, 29);
 		leftJPanel.add(btDelete);
-		
-		btGetInfor = new JButton("GetInfor");
-		btGetInfor.setBounds(61, 362, 100, 29);
-		leftJPanel.add(btGetInfor);
-		
-		btSearch = new JButton("Search");
-		btSearch.setBounds(182, 362, 100, 29);
-		leftJPanel.add(btSearch);
-		
 		
 		scrTable = new JScrollPane();
 		//view infor of khach hang
@@ -172,9 +192,35 @@ public class KhachHangView extends JFrame {
 		TitledBorder rightTitle= BorderFactory.createTitledBorder(rightBorder, "Thông tin");
 		scrTable.setBorder(rightTitle);
 		
-//		reload();
+		reload();
 		tableModel= new DefaultTableModel(vData,vTitle);
 		table = new JTable(tableModel)	;
+		table.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+			}
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+//				getInfor();
+				if(arg0.getClickCount()==2) {
+					System.out.println("2");
+					getInfor();
+				}
+			}
+		});
 		scrTable.setViewportView(table);
 		
 		btHD = new JButton("Hoá Đơn");
@@ -196,35 +242,98 @@ public class KhachHangView extends JFrame {
 		});
 		contentPane.add(btDK);
 		
+		tfSearch = new JTextField();
+		tfSearch.setBounds(15, 17, 248, 26);
+		contentPane.add(tfSearch);
+		tfSearch.setColumns(10);
+		
+		btSearch = new JButton("Search");
+		btSearch.setBounds(278, 16, 100, 29);
+		contentPane.add(btSearch);
+		btSearch.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				search();
+			tableModel.fireTableStructureChanged();
+			}
+		});
+		
 		
 	}
 	
 	public void reload() {
 		try {
-			vData.clear();
-			vTitle.clear();
-			java.sql.Statement statement = connection.createStatement();
-			String sql="select * from khachhang";
-			ResultSet resultSet= statement.executeQuery(sql);
-			ResultSetMetaData resultSetMetaData=resultSet.getMetaData();
-			int column= resultSetMetaData.getColumnCount();
-			vTitle= new Vector(column);
-			for(int i=1; i<column;i++) {
-				vTitle.add(resultSetMetaData.getColumnLabel(i));
-			}
-			vData=new Vector();
-			while (resultSet.next()) {
-				Vector row= new Vector(column);
-				for(int i=1; i<column; i++) {
-					row.add(resultSet.getString(i));
-				}
-				vData.add(row);
-			}
-			resultSet.close();
-			statement.close();
+			SelectKH selectKH= new SelectKH();
+			selectKH.execute();
+			vData= selectKH.getvData();
+			vTitle=selectKH.getvTitle();
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
+	}
+	private void getInfor() {
+		//lay hang duoc chon
+		int selectedRow= table.getSelectedRow();
+		Vector row= (Vector)vData.elementAt(selectedRow);
+		tfMaKH.setText(row.elementAt(0).toString());
+		tfTenKH.setText(row.elementAt(1).toString());
+		tfCMND.setText(row.elementAt(2).toString());
+		tfDiaChi.setText(row.elementAt(3).toString());		
+		tfSDT.setText(row.elementAt(4).toString());
+		
+	}
+	public void search() {
+		
+		SearchKH searchKH = new SearchKH();
+		searchKH.execute(tfSearch.getText());
+		vTitle= searchKH.getvTitle();
+		vData= searchKH.getvData();
+		tableModel = new DefaultTableModel(vData, vTitle);
+		table.setModel(tableModel);
+		
+	}
+	public void update() {
+		Vector<String> dataUpdate= new Vector<String>();
+		dataUpdate.add(tfMaKH.getText());
+		dataUpdate.add(tfTenKH.getText());
+		dataUpdate.add(tfCMND.getText());
+		dataUpdate.add(tfDiaChi.getText());
+		dataUpdate.add(tfSDT.getText());
+		if(cbMDSD.getSelectedItem().toString().equals("Kinh doanh")) {
+			dataUpdate.add("KD");
+		}
+		else {
+			dataUpdate.add("GD");
+		}
+		dataUpdate.add(tfMaKH.getText());
+		
+		UpdateKH updateKH = new UpdateKH(dataUpdate);
+		updateKH.execute();
+		reload();
+		reload();
+		tableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(tableModel);
+	}
+	
+	public void insert() {
+		Vector<String> dataUpdate= new Vector<String>();
+		dataUpdate.add(tfMaKH.getText());
+		dataUpdate.add(tfTenKH.getText());
+		dataUpdate.add(tfCMND.getText());
+		dataUpdate.add(tfDiaChi.getText());
+		dataUpdate.add(tfSDT.getText());
+		if(cbMDSD.getSelectedItem().toString().equals("Kinh doanh")) {
+			dataUpdate.add("KD");
+		}
+		else {
+			dataUpdate.add("GD");
+		}
+		insertKH insertKH = new insertKH(dataUpdate);
+		insertKH.execute();
+		
+		vData.add(dataUpdate);
+		tableModel.fireTableDataChanged();
 	}
 }

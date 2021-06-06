@@ -1,30 +1,20 @@
 package Controller;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
-import View.KhachHangView;
-
-public class SelectKH implements Serializable{
+public class SelectDK implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Vector vData= new Vector();
 	private Vector vTitle= new Vector();
 	
-	public SelectKH() {
+	public SelectDK() {
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -44,15 +34,17 @@ public class SelectKH implements Serializable{
 		this.vTitle = vTitle;
 	}
 	
-	public void execute(){
-		String sql= "select * from khachhang";
+	public void execute() {
+		String sql= "select * from dienke";
 		try {
+			//tao client gui den server
 			Client client = new Client(InetAddress.getLocalHost(), 6793);
 			Socket socket= client.connectServer();
 			DataOutputStream dos= new DataOutputStream(socket.getOutputStream());
 			dos.writeUTF(sql);
 			dos.flush();
-//			DataInputStream dis= new DataInputStream(socket.getInputStream());
+			
+			//nhan cac vector tu server
 			ObjectInputStream objInputStream = new ObjectInputStream(socket.getInputStream());
 //			
 			vTitle= (Vector) objInputStream.readObject();
@@ -66,8 +58,5 @@ public class SelectKH implements Serializable{
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
 	}
-		
-	
-	
 	
 }

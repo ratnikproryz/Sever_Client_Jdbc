@@ -5,6 +5,11 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -14,12 +19,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JButton;
 import com.toedter.calendar.JDateChooser;
+
+import Controller.SelectDK;
+import Controller.SelectKH;
 
 public class DienKeView extends JFrame {
 
@@ -29,8 +38,11 @@ public class DienKeView extends JFrame {
 	private JTextField tfCS_cu;
 	private JTextField tfCS_moi;
 	private JTextField tfMaKH;
+	private JDateChooser dateChooser;
 	private JTable table;
 	private DefaultTableModel defaultTableModel;
+	private Vector vData= new Vector();
+	private Vector vTitle= new Vector();
 	/**
 	 * Launch the application.
 	 */
@@ -126,7 +138,7 @@ public class DienKeView extends JFrame {
 		btnSearch.setBounds(201, 296, 98, 29);
 		leftPanel.add(btnSearch);
 		
-		JDateChooser dateChooser = new JDateChooser();
+		dateChooser = new JDateChooser();
 		dateChooser.setBounds(190, 66, 146, 26);
 		leftPanel.add(dateChooser);
 		
@@ -137,8 +149,36 @@ public class DienKeView extends JFrame {
 		TitledBorder titledBorder2 = BorderFactory.createTitledBorder(border, "Thông tin");
 		scrollPane.setBorder(titledBorder2);
 		
-		defaultTableModel= new DefaultTableModel();
+		reload();
+		defaultTableModel= new DefaultTableModel(vData, vTitle);
 		table = new JTable(defaultTableModel);
+		table.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+			}
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					getInfor();
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		scrollPane.setViewportView(table);
 		
 		JButton btBack = new JButton("Back");
@@ -151,5 +191,32 @@ public class DienKeView extends JFrame {
 		});
 		contentPane.add(btBack);
 		
+	}
+	
+	public void reload() {
+		try {
+			vData.clear();
+			vTitle.clear();
+			SelectDK selectDK = new SelectDK();
+			selectDK.execute();
+			
+			vData= selectDK.getvData();
+			vTitle=selectDK.getvTitle();
+		} catch (Exception e) {
+			// TODO: handle exception
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
+	
+	public void getInfor() throws ParseException {
+		int selectedRow= table.getSelectedRow();
+		Vector row= (Vector)vData.elementAt(selectedRow);
+		tfMaDK.setText(row.elementAt(0).toString());
+		String dateValue= row.elementAt(1).toString();
+		java.util.Date date= new SimpleDateFormat("yyyy-mm-dd").parse(dateValue);
+		dateChooser.setDate(date);
+		tfCS_cu.setText(row.elementAt(2).toString());
+		tfCS_moi.setText(row.elementAt(3).toString());
+		tfMaKH.setText(row.elementAt(4).toString());
 	}
 }

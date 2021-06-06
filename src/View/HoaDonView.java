@@ -5,16 +5,24 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import com.toedter.calendar.JDateChooser;
+
+import Controller.SelectHD;
+
 import com.jgoodies.common.base.Strings;
 
 import javax.swing.BorderFactory;
@@ -26,10 +34,13 @@ public class HoaDonView extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField tfSearch;
+	private DefaultTableModel tableModel;
 	private JTable table;
 	private JLabel lbMaHD, lbMaKH, lbTenKH, lbMonth, lbCS_cu, lbCS_moi, lbLgDien, lbThue, lbTotal, lbStatus;
 	private JButton btBack;
-
+	
+	private Vector vData= new Vector();
+	private Vector vTitle= new Vector();
 	/**
 	 * Launch the application.
 	 */
@@ -145,7 +156,9 @@ public class HoaDonView extends JFrame {
 		scrollPane.setBounds(354, 67, 543, 464);
 		contentPane.add(scrollPane);
 		
-		table = new JTable();
+		reload();
+		tableModel= new DefaultTableModel(vData, vTitle);
+		table = new JTable(tableModel);
 		scrollPane.setViewportView(table);
 		
 		tfSearch = new JTextField();
@@ -171,4 +184,19 @@ public class HoaDonView extends JFrame {
 		});
 		contentPane.add(btBack);
 	}
+	
+	public void reload() {
+		try {
+			vData.clear();
+			vTitle.clear();
+			SelectHD selectHD= new SelectHD();
+			selectHD.execute();
+			vData= selectHD.getvData();
+			vTitle=selectHD.getvTitle();
+		} catch (Exception e) {
+			// TODO: handle exception
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
+	
 }
