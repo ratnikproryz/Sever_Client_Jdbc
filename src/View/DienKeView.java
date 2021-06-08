@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -27,8 +28,14 @@ import javax.swing.JTable;
 import javax.swing.JButton;
 import com.toedter.calendar.JDateChooser;
 
+import Controller.DeleteDK;
+import Controller.InsertDK;
+import Controller.SearchDK;
+import Controller.SearchKH;
 import Controller.SelectDK;
 import Controller.SelectKH;
+import Controller.UpdateDK;
+import Controller.insertKH;
 
 public class DienKeView extends JFrame {
 
@@ -38,11 +45,12 @@ public class DienKeView extends JFrame {
 	private JTextField tfCS_cu;
 	private JTextField tfCS_moi;
 	private JTextField tfMaKH;
-	private JDateChooser dateChooser;
+	private JDateChooser dateChooser,dateSearch ;
 	private JTable table;
 	private DefaultTableModel defaultTableModel;
 	private Vector vData= new Vector();
 	private Vector vTitle= new Vector();
+	private JTextField tfSearch;
 	/**
 	 * Launch the application.
 	 */
@@ -121,22 +129,33 @@ public class DienKeView extends JFrame {
 		JButton btInsert = new JButton("Insert");
 		btInsert.setBounds(15, 251, 98, 29);
 		leftPanel.add(btInsert);
+		btInsert.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				insert();
+				System.out.println("insert");
+			}
+		});
 		
 		JButton btUpdate = new JButton("Update");
 		btUpdate.setBounds(141, 251, 98, 29);
 		leftPanel.add(btUpdate);
+		btUpdate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				update();
+			}
+		});
 		
 		JButton btDelete = new JButton("Delete");
 		btDelete.setBounds(254, 251, 98, 29);
 		leftPanel.add(btDelete);
-		
-		JButton btnGetinfor = new JButton("GetInfor");
-		btnGetinfor.setBounds(67, 296, 98, 29);
-		leftPanel.add(btnGetinfor);
-		
-		JButton btnSearch = new JButton("Search");
-		btnSearch.setBounds(201, 296, 98, 29);
-		leftPanel.add(btnSearch);
+		btDelete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delete();
+			}
+		});
 		
 		dateChooser = new JDateChooser();
 		dateChooser.setBounds(190, 66, 146, 26);
@@ -191,6 +210,24 @@ public class DienKeView extends JFrame {
 		});
 		contentPane.add(btBack);
 		
+		tfSearch = new JTextField();
+		tfSearch.setBounds(396, 12, 253, 36);
+		contentPane.add(tfSearch);
+		tfSearch.setColumns(10);
+		
+		JButton btnSearch = new JButton("Search");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				search();
+			}
+		});
+		btnSearch.setBounds(799, 16, 98, 32);
+		contentPane.add(btnSearch);
+		
+		dateSearch = new JDateChooser();
+		dateSearch.setBounds(664, 12, 127, 36);
+		contentPane.add(dateSearch);
+		
 	}
 	
 	public void reload() {
@@ -213,10 +250,74 @@ public class DienKeView extends JFrame {
 		Vector row= (Vector)vData.elementAt(selectedRow);
 		tfMaDK.setText(row.elementAt(0).toString());
 		String dateValue= row.elementAt(1).toString();
-		java.util.Date date= new SimpleDateFormat("yyyy-mm-dd").parse(dateValue);
+		java.util.Date date= new SimpleDateFormat("yyyy-MM-dd").parse(dateValue);
 		dateChooser.setDate(date);
 		tfCS_cu.setText(row.elementAt(2).toString());
 		tfCS_moi.setText(row.elementAt(3).toString());
 		tfMaKH.setText(row.elementAt(4).toString());
+	}
+	
+	public void insert() {
+		Vector<String> dataInsert = new Vector<String>();
+		dataInsert.add(tfMaDK.getText());
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+		String date = sdf.format(dateChooser.getDate());
+		System.out.println(date);
+		dataInsert.add(date);
+		dataInsert.add(tfCS_cu.getText());
+		dataInsert.add(tfCS_moi.getText());
+		dataInsert.add(tfMaKH.getText());
+		
+		InsertDK insertDK = new InsertDK(dataInsert);
+		insertDK.execute();
+		reload();
+		reload();
+		defaultTableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(defaultTableModel);
+	}
+	
+	public void update() {
+		Vector<String> dataUpdate = new Vector<String>();
+		dataUpdate.add(tfMaDK.getText());
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+		String date = sdf.format(dateChooser.getDate());
+		System.out.println(date);
+		dataUpdate.add(date);
+		dataUpdate.add(tfCS_cu.getText());
+		dataUpdate.add(tfCS_moi.getText());
+		dataUpdate.add(tfMaKH.getText());
+		dataUpdate.add(tfMaDK.getText());
+		UpdateDK updateDK = new UpdateDK(dataUpdate);
+		updateDK.execute();
+		
+		reload();
+		reload();
+		defaultTableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(defaultTableModel);
+	}
+	public void delete() {
+		DeleteDK deleteDK = new DeleteDK();
+		deleteDK.execute(tfMaDK.getText());
+		System.out.println(tfMaDK.getText());
+		reload();
+		reload();
+		defaultTableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(defaultTableModel);
+	}
+	public void search() {
+		Vector<String> dataSearch = new Vector<String>();
+		dataSearch.add(tfSearch.getText());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(dateSearch.getDate());
+		System.out.println(date);
+		dataSearch.add(date);
+		
+		SearchDK searchDK = new SearchDK(dataSearch);
+		searchDK.execute();
+		vData= searchDK.getvData();
+		vTitle= searchDK.getvTitle();
+
+		defaultTableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(defaultTableModel);
 	}
 }

@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import Controller.DAO;
+import Controller.DeleteKH;
 import Controller.SearchKH;
 import Controller.SelectKH;
 import Controller.UpdateKH;
@@ -183,7 +184,12 @@ public class KhachHangView extends JFrame {
 		btDelete = new JButton("Delete");
 		btDelete.setBounds(253, 317, 100, 29);
 		leftJPanel.add(btDelete);
-		
+		btDelete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				delete();
+			}
+		});
 		scrTable = new JScrollPane();
 		//view infor of khach hang
 		scrTable.setBounds(390, 49, 508, 482);
@@ -283,7 +289,7 @@ public class KhachHangView extends JFrame {
 		tfDiaChi.setText(row.elementAt(3).toString());		
 		tfSDT.setText(row.elementAt(4).toString());
 		
-	}
+	}		
 	public void search() {
 		
 		SearchKH searchKH = new SearchKH();
@@ -332,8 +338,22 @@ public class KhachHangView extends JFrame {
 		}
 		insertKH insertKH = new insertKH(dataUpdate);
 		insertKH.execute();
-		
-		vData.add(dataUpdate);
-		tableModel.fireTableDataChanged();
+		reload();
+		reload();
+		tableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(tableModel);
+	}
+	
+	public void delete() {
+		int selected= table.getSelectedRow();
+		Vector row = (Vector) vData.elementAt(selected);
+		String key = row.elementAt(0).toString();
+		System.out.println(key);
+		DeleteKH deleteKH = new DeleteKH();
+		deleteKH.execute(key);
+		reload();
+		reload();
+		tableModel= new DefaultTableModel(vData, vTitle);
+		table.setModel(tableModel);
 	}
 }
