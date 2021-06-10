@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.Vector;
@@ -439,15 +440,15 @@ class RequestSQL extends Thread implements Serializable {
 			String sql= "{call getBill(?,?,?)}";
 			CallableStatement callableStatement = connection.prepareCall(sql);
 			objInStream = new ObjectInputStream(socket.getInputStream());
-			Vector<String> dataGetBill =(Vector<String>) objInStream.readObject();
-			Enumeration<String> enumeration = dataGetBill.elements();
+			ArrayList<String> dataGetBill =(ArrayList<String>) objInStream.readObject();
 			int index=1;
-			while (enumeration.hasMoreElements()) {
-				String string = (String) enumeration.nextElement();
-				System.out.println(string);
-				callableStatement.setString(index, string);
+			
+			for(int i=0; i<dataGetBill.size(); i++) {
+				callableStatement.setString(index, dataGetBill.get(i));
 				index++;
 			}
+			
+		
 			ResultSet resultSet = callableStatement.executeQuery();
 			ResultSetMetaData metaData = resultSet.getMetaData();
 			int column = metaData.getColumnCount();
@@ -459,8 +460,9 @@ class RequestSQL extends Thread implements Serializable {
 					System.out.print(resultSet.getString(i) + "\t");
 				}
 			}
-			objOutStream = new ObjectOutputStream(socket.getOutputStream());
+			
 			objOutStream.writeObject(dataGetBill);
+			objOutStream.flush();
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();

@@ -3,12 +3,14 @@ package View;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.nio.channels.AcceptPendingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -43,8 +45,22 @@ public class HoaDonView extends JFrame {
 	private JLabel lbMaHD, lbMaKH, lbTenKH, lbMonth, lbCS_cu, lbCS_moi, lbLgDien, lbThue, lbTotal, lbStatus;
 	private JButton btBack;
 	
+	private JLabel lbValueTemp;
+	private JLabel lbValueLoaiDien;
+	private JLabel lbValueDonGia;
+	private JLabel lbValueTotal;
+	private JLabel lbValueThue;
+	private JLabel lbValueLgDien;
+	private JLabel lbValueMonth;
+	private JLabel lbValueCSC;
+	private JLabel lbValueCSM;
+	private JLabel lbValueTenKH;
+	private JLabel lbValueMaKH;
+	private JLabel lbValueMaHD;
+	
 	private Vector vData= new Vector();
 	private Vector vTitle= new Vector();
+	private JButton btPay;
 	/**
 	 * Launch the application.
 	 */
@@ -120,44 +136,45 @@ public class HoaDonView extends JFrame {
 		lbStatus.setBounds(15, 357, 125, 20);
 		leftPanel.add(lbStatus);
 		
-		JLabel lbValueMaHD = new JLabel("null");
+		lbValueMaHD = new JLabel("null");
 		lbValueMaHD.setBounds(163, 29, 106, 20);
 		leftPanel.add(lbValueMaHD);
 		
-		JLabel lbValueMaKH = new JLabel("null");
+		lbValueMaKH = new JLabel("null");
 		lbValueMaKH.setBounds(163, 54, 106, 20);
 		leftPanel.add(lbValueMaKH);
 		
-		JLabel lbValueTenKH = new JLabel("null");
+		lbValueTenKH = new JLabel("null");
 		lbValueTenKH.setBounds(163, 79, 106, 20);
 		leftPanel.add(lbValueTenKH);
 		
-		JLabel lbValueMonth = new JLabel("null");
+		lbValueMonth = new JLabel("null");
 		lbValueMonth.setBounds(163, 101, 106, 20);
 		leftPanel.add(lbValueMonth);
 		
-		JLabel lbValueCSC = new JLabel("null");
+		lbValueCSC = new JLabel("null");
 		lbValueCSC.setBounds(163, 133, 106, 20);
 		leftPanel.add(lbValueCSC);
 		
-		JLabel lbValueCSM = new JLabel("null");
+		lbValueCSM = new JLabel("null");
 		lbValueCSM.setBounds(163, 159, 106, 20);
 		leftPanel.add(lbValueCSM);
 		
-		JLabel lbValueLgDien = new JLabel("null");
+		lbValueLgDien = new JLabel("null");
 		lbValueLgDien.setBounds(163, 185, 106, 20);
 		leftPanel.add(lbValueLgDien);
 		
-		JLabel lbValueThue = new JLabel("null");
+		lbValueThue = new JLabel("null");
 		lbValueThue.setBounds(163, 293, 106, 20);
 		leftPanel.add(lbValueThue);
 		
-		JLabel lbValueTotal = new JLabel("null");
+		lbValueTotal = new JLabel("null");
 		lbValueTotal.setBounds(163, 329, 106, 20);
 		leftPanel.add(lbValueTotal);
 		
-		JButton btPay = new JButton("Thanh toán");
+		btPay = new JButton("Thanh toán");
 		btPay.setBounds(103, 393, 115, 29);
+		btPay.setEnabled(false);
 		leftPanel.add(btPay);
 		
 		JLabel lbDonGia = new JLabel("Đơn giá:");
@@ -172,15 +189,15 @@ public class HoaDonView extends JFrame {
 		lbTemp.setBounds(15, 268, 115, 20);
 		leftPanel.add(lbTemp);
 		
-		JLabel lbValueDonGia = new JLabel("null");
+		lbValueDonGia = new JLabel("null");
 		lbValueDonGia.setBounds(163, 217, 106, 20);
 		leftPanel.add(lbValueDonGia);
 		
-		JLabel lbValueLoaiDien = new JLabel("null");
+		lbValueLoaiDien = new JLabel("null");
 		lbValueLoaiDien.setBounds(163, 245, 106, 20);
 		leftPanel.add(lbValueLoaiDien);
 		
-		JLabel lbValueTemp = new JLabel("null");
+		lbValueTemp = new JLabel("null");
 		lbValueTemp.setBounds(163, 268, 106, 20);
 		leftPanel.add(lbValueTemp);
 		
@@ -203,13 +220,11 @@ public class HoaDonView extends JFrame {
 				// TODO Auto-generated method stub
 				
 			}
-			
 			@Override
 			public void mouseExited(MouseEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
-			
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
@@ -220,7 +235,6 @@ public class HoaDonView extends JFrame {
 				// TODO Auto-generated method stub
 //				click double to get bill
 				if(e.getClickCount() == 2) {
-					System.out.println("ok");
 					getBill();
 				}
 			}
@@ -287,7 +301,7 @@ public class HoaDonView extends JFrame {
 			String madk= rowSelected.elementAt(5).toString();
 			String makh= rowSelected.elementAt(1).toString();
 			String month= rowSelected.elementAt(2).toString();
-			Vector<String> dataGetBill = new Vector<String>();
+			ArrayList<String> dataGetBill = new ArrayList<String>();
 			dataGetBill.add(madk);
 			dataGetBill.add(makh);
 			dataGetBill.add(month);
@@ -298,9 +312,46 @@ public class HoaDonView extends JFrame {
 			dataGetBill= getBill.getDataGetBill();
 			System.out.println(dataGetBill.toString());
 			
+			calculator(dataGetBill);
 			
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 		}
+	}
+	
+	public void calculator(ArrayList<String> data){ {
+		lbValueMaHD.setText(data.get(0));
+		lbValueMaKH.setText(data.get(1));
+		lbValueTenKH.setText(data.get(2));
+		lbValueMonth.setText(data.get(3));
+		lbValueCSC.setText(data.get(4));
+		lbValueCSM.setText(data.get(5));
+		lbValueDonGia.setText(data.get(6) +" VND");
+		lbValueLoaiDien.setText(data.get(7));
+		int check=Integer.parseInt(data.get(8));
+		if(check==0) {
+//			kiem tra hoa don da thanh toan hay chua
+			lbStatus.setText("Chưa thanh toán!");
+			btPay.setEnabled(true);
+		}
+		else {
+			lbStatus.setText("Đã Thanh toán!");
+			btPay.setEnabled(false);
+		}
+		
+		int cs_cu= Integer.parseInt(data.get(4));
+		int cs_moi= Integer.parseInt(data.get(5));
+		float dongia= Float.parseFloat(data.get(6));
+		int luongdien= cs_moi - cs_cu;
+		lbValueLgDien.setText(luongdien+"");
+		float temp= luongdien*dongia;
+		float thue= 0.1f*temp;
+		lbValueTemp.setText(temp+" VND");
+		lbValueThue.setText((thue) +" VND");
+		float total = temp + thue;
+		lbValueTotal.setText(total +" VND");
+	}
+		
 	}
 }

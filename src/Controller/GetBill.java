@@ -6,26 +6,30 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Vector;
+
+import javax.sound.midi.Soundbank;
 
 import org.ietf.jgss.Oid;
 
 public class GetBill implements Serializable {
-	private Vector<String> dataGetBill;
+	private static final long serialVersionUID = 1L;
+	private ArrayList<String> dataGetBill;
 	
 	public GetBill() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public GetBill(Vector<String> dataGetBill) {
+	public GetBill(ArrayList<String> dataGetBill) {
 		this.dataGetBill = dataGetBill;
 	}
 	
-	public Vector<String> getDataGetBill() {
+	public ArrayList<String> getDataGetBill() {
 		return dataGetBill;
 	}
 
-	public void setDataGetBill(Vector<String> dataGetBill) {
+	public void setDataGetBill(ArrayList<String> dataGetBill) {
 		this.dataGetBill = dataGetBill;
 	}
 
@@ -45,11 +49,11 @@ public class GetBill implements Serializable {
 			System.out.println(dataGetBill.toString());
 			
 			ObjectInputStream  objectInputStream = new ObjectInputStream(socket.getInputStream());
-			dataGetBill = (Vector<String>) objectInputStream.readObject();
-			
+			dataGetBill = (ArrayList<String>) objectInputStream.readObject();
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
-		}
+		} 
 	}
 }
